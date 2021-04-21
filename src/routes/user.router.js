@@ -8,4 +8,6 @@ router.post("/sign-in", userController.signIn);
 
 router.get("/profile", authenticateToken, userController.profile);
 
+router.get("/my-destination", authenticateToken, userController.myDestination);
+
 module.exports = router;

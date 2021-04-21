@@ -14,9 +14,13 @@ const BaseUserSchema = new Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    required: true,
+    default: Role.COMMON_USER,
+  },
+  avatar: String,
 });
-
-const BaseUser = model("BaseUser", BaseUserSchema);
 
 const BloggerSchema = new Schema({
   role: { type: String, default: Role.BLOGGER },
@@ -25,6 +29,7 @@ const AdminSchema = new Schema({
   role: { type: String, default: Role.ADMIN },
 });
 
+const BaseUser = model("BaseUser", BaseUserSchema);
 const Blogger = BaseUser.discriminator("Blogger", BloggerSchema);
 const Admin = BaseUser.discriminator("Admin", AdminSchema);
 

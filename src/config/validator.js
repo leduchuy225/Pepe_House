@@ -1,7 +1,9 @@
+const { hasEmptyField } = require("./helper");
+
 module.exports.validateSignIn = (username, password) => {
   const errors = [];
 
-  if (!username || !password) {
+  if (hasEmptyField(username, password)) {
     errors.push("Username or password must not be empty");
   }
 
@@ -17,18 +19,39 @@ module.exports.validateSignUp = (
   password,
   confirmPassword
 ) => {
-  let errors = [];
-
-  if (!username) {
-    errors.push("Username must not be empty");
-  }
-  if (!displayName) {
-    errors.push("Display name must not be empty");
-  }
-  if (!password) {
-    errors.push("Password must not be empty");
+  const errors = [];
+  if (hasEmptyField(displayName, username, password, confirmPassword)) {
+    errors.push("Required fields are empty");
   } else if (password !== confirmPassword) {
     errors.push("Password must match with confirm password");
+  }
+
+  return {
+    errors,
+    valid: errors.length < 1,
+  };
+};
+
+module.exports.validateDestination = (
+  name,
+  address,
+  description,
+  coordinates,
+  tags
+) => {
+  const errors = [];
+  if (hasEmptyField(name, address, description)) {
+    errors.push("Required fields are empty");
+  }
+  if (
+    !coordinates ||
+    coordinates.length !== 2 ||
+    hasEmptyField(...coordinates)
+  ) {
+    errors.push("Invalid coordinate");
+  }
+  if (!tags || hasEmptyField(...tags)) {
+    errors.push("Invalid tags");
   }
 
   return {

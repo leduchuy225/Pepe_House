@@ -1,9 +1,10 @@
 const { validateSignIn, validateSignUp } = require("../config/validator");
 const { generateToken } = require("../config/helper");
+const { BaseUser } = require("../models/user.model");
+const Destionation = require("../models/destination.model");
+const { failureRes, successRes } = require("../config/response");
 
-const { BaseUser, Blogger } = require("../models/user.model");
-
-const signUp = async (req, res) => {
+module.exports.signUp = async (req, res) => {
   const { displayName, username, password, confirmPassword } = req.body;
   const { errors, valid } = validateSignUp(
     displayName,
@@ -12,53 +13,54 @@ const signUp = async (req, res) => {
     confirmPassword
   );
 
+  if (!valid) {
+    return failureRes(req, res)(errors);
+  }
+
+  const user = await BaseUser.findOne({ username });
+  if (user) {
+    return failureRes(req, res)(["Username already exists"]);
+  }
+
+  const commonUser = new BaseUser({ displayName, username, password });
+
   try {
-    if (!valid) {
-      return res.json({ success: false, errors: errors });
-    }
-
-    const newBlogger = new Blogger({ displayName, username, password });
-
-    await newBlogger.save();
-    res.status(200).json({ success: true, data: { user: newBlogger } });
+    await commonUser.save();
+    return successRes(req, res)({ user: commonUser });
   } catch (err) {
-    res.json({
-      success: false,
-      errors: [err?.message || "Something went wrong"],
-    });
+    return failureRes(req, res)([err?.message]);
   }
 };
 
-const signIn = async (req, res) => {
+module.exports.signIn = async (req, res) => {
   const { username, password } = req.body;
   const { errors, valid } = validateSignIn(username, password);
   const err = [];
 
   if (!valid) {
-    return res.json({ success: false, errors: errors });
+    return failureRes(req, res, 401)(errors);
   }
 
   const user = await BaseUser.findOne({ username }, { password: 0 });
 
   if (!user) {
     err.push("Username is not found. Invalid login credentials");
-    return res.status(404).json({
-      success: false,
-      errors: err,
-    });
+    return failureRes(req, res)(err);
   }
 
   const accessToken = generateToken(user);
+  const userInfo = { ...user.toObject(), token: accessToken };
 
-  return res.status(200).json({
-    success: true,
-    data: { user: { ...user.toObject(), token: accessToken } },
-  });
+  return successRes(req, res)({ user: userInfo });
 };
 
-const profile = (req, res) => {
+module.exports.profile = (req, res) => {
   const { user } = req;
-  res.status(200).json({ success: true, data: user });
+  return successRes(req, res)({ user });
 };
 
-module.exports = { signIn, signUp, profile };
+module.exports.myDestination = async (req, res) => {
+  const { _id } = req.user;
+  const destinations = await Destionation.find({ author: _id });
+  return successRes(req, res)({ destinations });
+};

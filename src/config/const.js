@@ -4,6 +4,8 @@ if (!process.env.PORT) {
   process.exit(1);
 }
 
+const LIMIT_SIZE = 1024 * 1024;
+
 const env = {
   MONGO_URL: process.env.MONGO_URL,
   PORT: process.env.PORT,
@@ -11,9 +13,24 @@ const env = {
 };
 
 const Role = {
-  ADMIN: 1,
+  COMMON_USER: 1,
   BLOGGER: 2,
-  VIEWER: 3,
+  ADMIN: 3,
 };
 
-module.exports = { env, Role };
+const Type = {
+  DESTINATION: 1,
+  JOURNEY: 2,
+  CITY: 3,
+};
+
+const DestinationType = {
+  HOTEL: 1,
+  RESTAURANT: 2,
+  SIGHTSEEING: 3,
+  PARK: 4,
+};
+
+const JourneyType = {};
+
+module.exports = { env, Role, Type, DestinationType, LIMIT_SIZE };

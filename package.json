@@ -4,19 +4,20 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon app/server.js",
-    "build": "babel app -d distribution",
-    "serve": "node distribution/index.js"
+    "dev": "nodemon src/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cloudinary": "^1.25.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.3",
-    "passport-jwt": "^4.0.0"
+    "multer": "^1.4.2",
+    "passport-jwt": "^4.0.0",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"

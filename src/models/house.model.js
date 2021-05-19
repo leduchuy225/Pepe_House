@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const DestinationSchema = new Schema({
+const HouseSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -13,6 +13,10 @@ const DestinationSchema = new Schema({
     type: String,
     required: true,
   },
+  locationLabel: String,
+  region: String,
+  county: String,
+  locality: String,
   tags: { type: [Number] },
   coordinates: { type: [Number], required: true },
   images: [{ type: String }],
@@ -26,6 +30,10 @@ const DestinationSchema = new Schema({
       ref: "Review",
     },
   ],
+  accepted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-module.exports = model("Destination", DestinationSchema);
+module.exports = model("House", HouseSchema);

@@ -32,7 +32,7 @@ module.exports.validateSignUp = (
   };
 };
 
-module.exports.validateDestination = (
+module.exports.validateHouse = (
   name,
   address,
   description,
@@ -43,15 +43,33 @@ module.exports.validateDestination = (
   if (hasEmptyField(name, address, description)) {
     errors.push("Required fields are empty");
   }
-  if (
-    !coordinates ||
-    coordinates.length !== 2 ||
-    hasEmptyField(...coordinates)
-  ) {
+  if (!coordinates || coordinates.length !== 2) {
     errors.push("Invalid coordinate");
+  } else {
+    for (const coordinate of coordinates) {
+      if (!coordinate || isNaN(coordinate)) {
+        errors.push("Invalid coordinate");
+        break;
+      }
+    }
   }
   if (!tags || hasEmptyField(...tags)) {
     errors.push("Invalid tags");
+  }
+
+  return {
+    errors,
+    valid: errors.length < 1,
+  };
+};
+
+module.exports.validateReview = (point, content) => {
+  const errors = [];
+  if (hasEmptyField(point, content)) {
+    errors.push("Required fields are empty");
+  }
+  if (isNaN(point)) {
+    errors.push("Invalid point");
   }
 
   return {

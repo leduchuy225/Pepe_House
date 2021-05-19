@@ -1,7 +1,6 @@
 const multer = require("multer");
-const { fileFilter } = require("../config/helper");
-const { failureRes } = require("./response");
-const { LIMIT_SIZE } = require("./const");
+const { failureRes } = require("../config/response");
+const { LIMIT_SIZE } = require("../config/const");
 
 const validateFile = (req, res, next) => {
   const fileUpload = multer({
@@ -21,6 +20,14 @@ const validateFile = (req, res, next) => {
 
     next();
   });
+};
+
+const fileFilter = (req, file, callback) => {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    callback(null, true);
+  } else {
+    callback("Unsupported file format", false);
+  }
 };
 
 module.exports = { validateFile };

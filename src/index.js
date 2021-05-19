@@ -15,12 +15,12 @@ const options = {
   useFindAndModify: true,
 };
 
-connectToServer();
+// connectToServer();
 
 app.use("/api/users", require("./routes/user.router"));
-app.use("/api/destinations", require("./routes/destination.router"));
+app.use("/api/houses", require("./routes/houses.router"));
 app.use("/api/search", require("./routes/search.router"));
-app.use("/api/review", require("./routes/review.router"));
+app.use("/api/feat", require("./routes/feat.router"));
 
 app.listen(env.PORT, () => console.log("Server is running on", env.PORT));
 

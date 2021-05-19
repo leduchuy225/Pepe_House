@@ -5,11 +5,15 @@ const ReviewSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "BaseUser",
   },
-  point: Number,
+  point: { type: Number, required: true },
   content: {
     type: String,
     required: true,
   },
+  createAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-module.exports = model("Reivew", ReviewSchema);
+module.exports = model("Review", ReviewSchema);

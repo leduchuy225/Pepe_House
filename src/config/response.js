@@ -1,4 +1,4 @@
-successRes = (req, res) => {
+module.exports.successRes = (req, res) => {
   return (data) => {
     return res.status(200).json({
       success: true,
@@ -7,7 +7,7 @@ successRes = (req, res) => {
   };
 };
 
-failureRes = (req, res, status) => {
+module.exports.failureRes = (req, res, status) => {
   return (err) => {
     if (!err.length) {
       err.push("Something went wrong. Please try again");
@@ -18,5 +18,3 @@ failureRes = (req, res, status) => {
     });
   };
 };
-
-module.exports = { successRes, failureRes };

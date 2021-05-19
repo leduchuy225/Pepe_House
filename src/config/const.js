@@ -10,6 +10,7 @@ const env = {
   MONGO_URL: process.env.MONGO_URL,
   PORT: process.env.PORT,
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
+  WEMAP_API_KEY: process.env.WEMAP_API_KEY,
 };
 
 const Role = {
@@ -24,7 +25,7 @@ const Type = {
   CITY: 3,
 };
 
-const DestinationType = {
+const HouseType = {
   HOTEL: 1,
   RESTAURANT: 2,
   SIGHTSEEING: 3,
@@ -33,4 +34,4 @@ const DestinationType = {
 
 const JourneyType = {};
 
-module.exports = { env, Role, Type, DestinationType, LIMIT_SIZE };
+module.exports = { env, Role, Type, HouseType, LIMIT_SIZE };

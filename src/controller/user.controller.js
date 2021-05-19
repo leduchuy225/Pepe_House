@@ -1,7 +1,7 @@
 const { validateSignIn, validateSignUp } = require("../config/validator");
-const { generateToken } = require("../config/helper");
+const { generateToken, isValidID } = require("../config/helper");
 const { BaseUser } = require("../models/user.model");
-const Destionation = require("../models/destination.model");
+const Destionation = require("../models/house.model");
 const { failureRes, successRes } = require("../config/response");
 
 module.exports.signUp = async (req, res) => {
@@ -59,8 +59,38 @@ module.exports.profile = (req, res) => {
   return successRes(req, res)({ user });
 };
 
-module.exports.myDestination = async (req, res) => {
+module.exports.myHouse = async (req, res) => {
   const { _id } = req.user;
-  const destinations = await Destionation.find({ author: _id });
-  return successRes(req, res)({ destinations });
+  const houses = await Destionation.find({ author: _id });
+  return successRes(req, res)({ houses });
+};
+
+module.exports.acceptHouse = async (req, res) => {
+  const { id } = req.params;
+  if (!isValidID(id)) {
+    return failureRes(req, res)(["Destionation not found"]);
+  }
+
+  try {
+    await Destionation.updateOne({ _id: id }, { accepted: true });
+  } catch (error) {
+    return failureRes(req, res)([err?.message]);
+  }
+
+  return successRes(req, res)({ message: "Destionation is accepted" });
+};
+
+module.exports.rejectHouse = async (req, res) => {
+  const { id } = req.params;
+  if (!isValidID(id)) {
+    return failureRes(req, res)(["Destionation not found"]);
+  }
+
+  try {
+    await Destionation.updateOne({ _id: id }, { accepted: false });
+  } catch (error) {
+    return failureRes(req, res)([err?.message]);
+  }
+
+  return successRes(req, res)({ message: "Destionation is rejected" });
 };

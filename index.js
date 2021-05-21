@@ -15,7 +15,9 @@ const options = {
   useFindAndModify: true,
 };
 
-// connectToServer();
+app.get("/", (req, res) => {
+  res.send("Welcome to my app");
+});
 
 app.use("/api/users", require("./src/routes/user.router"));
 app.use("/api/houses", require("./src/routes/house.router"));
@@ -24,9 +26,11 @@ app.use("/api/search", require("./src/routes/search.router"));
 
 app.listen(env.PORT, () => console.log("Server is running on", env.PORT));
 
-function connectToServer() {
+const connectToServer = () => {
   connect(env.MONGO_URL, options, (err) => {
     if (err) return console.log("Fail to connect database");
     console.log("Successfully connecting to database");
   });
-}
+};
+
+connectToServer();

@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const { HouseStatus } = require("../config/const");
 
 const HouseSchema = new Schema({
   name: {
@@ -13,12 +14,17 @@ const HouseSchema = new Schema({
     type: String,
     required: true,
   },
-  locationLabel: String,
-  region: String,
-  county: String,
-  locality: String,
-  tags: { type: [Number] },
-  coordinates: { type: [Number], required: true },
+  status: {
+    type: Number,
+    enum: [
+      HouseStatus.PENDING,
+      HouseStatus.SELLING,
+      HouseStatus.SOLD,
+      HouseStatus.REJECTED,
+    ],
+    default: HouseStatus.PENDING,
+  },
+  // coordinates: { type: [Number], required: true },
   images: [{ type: String }],
   author: {
     type: Schema.Types.ObjectId,
@@ -30,10 +36,6 @@ const HouseSchema = new Schema({
       ref: "Review",
     },
   ],
-  accepted: {
-    type: Boolean,
-    default: false,
-  },
 });
 
 module.exports = model("House", HouseSchema);

@@ -6,7 +6,7 @@ const validateFile = (req, res, next) => {
   const fileUpload = multer({
     fileFilter: fileFilter,
     limits: { fileSize: LIMIT_SIZE },
-  }).single("file");
+  }).array("file");
 
   fileUpload(req, res, function (err) {
     if (err instanceof multer.MulterError) {

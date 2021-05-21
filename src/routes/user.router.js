@@ -7,18 +7,11 @@ router.post("/sign-up", userController.signUp);
 
 router.post("/sign-in", userController.signIn);
 
-router.put(
-  "/accept/:id",
+router.post(
+  "/change-status/:id",
   authenticateToken,
-  authenticateRole([Role.ADMIN]),
-  userController.acceptHouse
-);
-
-router.put(
-  "/reject/:id",
-  authenticateToken,
-  authenticateRole([Role.ADMIN]),
-  userController.rejectHouse
+  authenticateRole([Role.ADMIN, Role.SELLER]),
+  userController.changeHouseStatus
 );
 
 router.get("/profile", authenticateToken, userController.profile);

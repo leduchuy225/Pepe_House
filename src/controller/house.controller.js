@@ -1,20 +1,20 @@
 const { validateHouse } = require("../config/validator");
 const { failureRes, successRes } = require("../config/response");
 const { uploadFile } = require("../utils/cloudinary");
-const Destionation = require("../models/house.model");
+const House = require("../models/house.model");
 const { isValidID } = require("../config/helper");
 const { Role } = require("../config/const");
 
 module.exports.getHouseById = async (req, res) => {
   const { id } = req.params;
   if (!isValidID(id)) {
-    return failureRes(req, res)(["Destionation not found"]);
+    return failureRes(req, res)(["House not found"]);
   }
 
-  const house = await Destionation.findOne({ _id: id });
+  const house = await House.findOne({ _id: id });
 
   if (!house) {
-    return failureRes(req, res)(["Destionation not found"]);
+    return failureRes(req, res)(["House not found"]);
   }
 
   if (!house.accepted) {
@@ -23,7 +23,7 @@ module.exports.getHouseById = async (req, res) => {
       req.user?.role !== Role.ADMIN ||
       req.user?._id !== house.author
     ) {
-      return failureRes(req, res)(["Destionation not found"]);
+      return failureRes(req, res)(["House not found"]);
     }
   }
 
@@ -68,7 +68,7 @@ module.exports.createHouse = async (req, res) => {
   console.log("Upload images successfully");
 
   const { url } = result;
-  const house = new Destionation({
+  const house = new House({
     name,
     address,
     description,
@@ -87,30 +87,29 @@ module.exports.createHouse = async (req, res) => {
   }
 };
 
-module.exports.deleteDestionation = async (req, res) => {
-  console.log(req.user);
+module.exports.deleteHouse = async (req, res) => {
   const { _id } = req.user;
   const { id } = req.params;
   if (!isValidID(id)) {
-    return failureRes(req, res)(["Destionation not found"]);
+    return failureRes(req, res)(["House not found"]);
   }
 
   try {
-    const delHouse = await Destionation.deleteOne({
-      _id: id,
-      author: _id,
-      accepted: false,
-    });
-    if (!delHouse.deletedCount) {
-      return failureRes(req, res)(["You can't delete this house"]);
+    if (req.user.role === Role.ADMIN) {
+      await House.deleteOne({ _id: id });
+    } else {
+      const delHouse = await House.deleteOne({
+        _id: id,
+        author: _id,
+      });
+      if (!delHouse.deletedCount) {
+        return failureRes(req, res, 403)(["You can't delete this house"]);
+      }
     }
-    return successRes(
-      req,
-      res
-    )({ message: "Delete destionation successfully" });
+    return successRes(req, res)({ message: "Delete house successfully" });
   } catch (error) {
     return failureRes(req, res)([error?.message]);
   }
 };
 
-module.exports.getDestionationList = async (req, res) => {};
+module.exports.getHouseList = async (req, res) => {};

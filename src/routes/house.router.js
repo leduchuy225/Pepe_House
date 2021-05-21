@@ -14,10 +14,6 @@ router.post(
   houseController.createHouse
 );
 
-router.delete(
-  "/delete/:id",
-  authenticateToken,
-  houseController.deleteDestionation
-);
+router.delete("/delete/:id", authenticateToken, houseController.deleteHouse);
 
 module.exports = router;

@@ -15,7 +15,7 @@ const BaseUserSchema = new Schema({
     required: true,
   },
   role: {
-    type: String,
+    type: Number,
     required: true,
     default: Role.COMMON_USER,
   },

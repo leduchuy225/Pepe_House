@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { failureRes } = require("../config/response");
 
 module.exports.generateToken = (user) => {
   return jwt.sign({ user }, env.ACCESS_TOKEN_SECRET, {

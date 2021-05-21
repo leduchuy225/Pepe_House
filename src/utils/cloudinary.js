@@ -7,25 +7,31 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadFile = (req, path) => {
-  return new Promise((resolve, reject) => {
-    if (!req?.file?.buffer) {
-      reject({ message: "File not found" });
+exports.uploadFile = (req, path) => {
+  return new Promise(async (resolve, reject) => {
+    if (!req.files?.length) {
+      return reject({ message: "File not found" });
     }
 
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: path },
-      (error, result) => {
-        if (result) {
-          resolve(result);
-        } else {
-          reject(error);
+    let imageURL = [];
+    let stream;
+
+    for (let i = 0; i < req.files.length; i++) {
+      stream = cloudinary.uploader.upload_stream(
+        { folder: path },
+        (error, result) => {
+          if (result) {
+            imageURL.push(result.url);
+            if (imageURL.length === req.files.length) return resolve(imageURL);
+          } else return reject(error);
         }
-      }
-    );
-    streamifier.createReadStream(req.file.buffer).pipe(stream);
+      );
+
+      await streamifier.createReadStream(req.files[i].buffer).pipe(stream);
+    }
   })
     .then((upload) => {
+      console.log("Upload:", upload);
       return {
         result: upload,
         success: true,
@@ -38,5 +44,3 @@ const uploadFile = (req, path) => {
       };
     });
 };
-
-module.exports = { uploadFile };

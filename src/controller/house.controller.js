@@ -3,7 +3,7 @@ const { failureRes, successRes } = require("../config/response");
 const { uploadFile } = require("../utils/cloudinary");
 const House = require("../models/house.model");
 const { isValidID } = require("../config/helper");
-const { Role } = require("../config/const");
+const { Role, HouseStatus } = require("../config/const");
 
 module.exports.getHouseById = async (req, res) => {
   const { id } = req.params;
@@ -17,7 +17,7 @@ module.exports.getHouseById = async (req, res) => {
     return failureRes(req, res)(["House not found"]);
   }
 
-  if (!house.accepted) {
+  if ([HouseStatus.PENDING, HouseStatus.REJECTED].includes(house.status)) {
     if (
       !req.user ||
       req.user?.role !== Role.ADMIN ||
@@ -42,9 +42,8 @@ module.exports.getHouseById = async (req, res) => {
 };
 
 module.exports.createHouse = async (req, res) => {
-  const { _id } = req.user;
   const { name, address, description, coordinates, tags } = req.body;
-  const { errors, valid } = validateHouse(
+  /* const { errors, valid } = validateHouse(
     name,
     address,
     description,
@@ -54,12 +53,7 @@ module.exports.createHouse = async (req, res) => {
 
   if (!valid) {
     return failureRes(req, res)(errors);
-  }
-
-  let accepted = false;
-  if (req.user?.role === Role.ADMIN) {
-    accepted = true;
-  }
+  } */
 
   const { result, success } = await uploadFile(req, name);
   if (!success) {
@@ -67,15 +61,13 @@ module.exports.createHouse = async (req, res) => {
   }
   console.log("Upload images successfully");
 
-  const { url } = result;
-  const house = new House({
+  /* const house = new House({
     name,
     address,
     description,
-    images: [url],
+    images: result.imageURL,
     coordinates,
-    author: _id,
-    accepted,
+    author: req.user._id,
     tags,
   });
 
@@ -84,7 +76,7 @@ module.exports.createHouse = async (req, res) => {
     return successRes(req, res)(house);
   } catch (err) {
     return failureRes(req, res)([err?.message]);
-  }
+  } */
 };
 
 module.exports.deleteHouse = async (req, res) => {

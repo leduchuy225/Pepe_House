@@ -9,7 +9,7 @@ router.get("/list", houseController.getHouseList);
 
 router.post(
   "/create",
-  authenticateToken,
+  // authenticateToken,
   validateFile,
   houseController.createHouse
 );

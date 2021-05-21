@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { connect } = require("mongoose");
-const { env } = require("./config/const");
+const { env } = require("./src/config/const");
 
 const app = express();
 
@@ -17,10 +17,10 @@ const options = {
 
 // connectToServer();
 
-app.use("/api/users", require("./routes/user.router"));
-app.use("/api/houses", require("./routes/houses.router"));
-app.use("/api/search", require("./routes/search.router"));
-app.use("/api/feat", require("./routes/feat.router"));
+app.use("/api/users", require("./src/routes/user.router"));
+app.use("/api/houses", require("./src/routes/house.router"));
+app.use("/api/search", require("./src/routes/search.router"));
+// app.use("/api/feat", require("./routes/feat.router"));
 
 app.listen(env.PORT, () => console.log("Server is running on", env.PORT));
 

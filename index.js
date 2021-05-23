@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", require("./src/routes/user.router"));
 app.use("/api/houses", require("./src/routes/house.router"));
 app.use("/api/search", require("./src/routes/search.router"));
-// app.use("/api/feat", require("./routes/feat.router"));
+app.use("/api/review", require("./src/routes/review.router"));
 
 app.listen(env.PORT, () => console.log("Server is running on", env.PORT));
 

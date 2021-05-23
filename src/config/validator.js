@@ -32,18 +32,12 @@ module.exports.validateSignUp = (
   };
 };
 
-module.exports.validateHouse = (
-  name,
-  address,
-  description,
-  coordinates,
-  tags
-) => {
+module.exports.validateHouse = (name, address, description) => {
   const errors = [];
   if (hasEmptyField(name, address, description)) {
     errors.push("Required fields are empty");
   }
-  if (!coordinates || coordinates.length !== 2) {
+  /* if (!coordinates || coordinates.length !== 2) {
     errors.push("Invalid coordinate");
   } else {
     for (const coordinate of coordinates) {
@@ -52,15 +46,9 @@ module.exports.validateHouse = (
         break;
       }
     }
-  }
-  if (!tags || hasEmptyField(...tags)) {
-    errors.push("Invalid tags");
-  }
+  } */
 
-  return {
-    errors,
-    valid: errors.length < 1,
-  };
+  return { errors, valid: errors.length < 1 };
 };
 
 module.exports.validateReview = (point, content) => {
@@ -72,8 +60,5 @@ module.exports.validateReview = (point, content) => {
     errors.push("Invalid point");
   }
 
-  return {
-    errors,
-    valid: errors.length < 1,
-  };
+  return { errors, valid: errors.length < 1 };
 };

@@ -9,11 +9,11 @@ cloudinary.config({
 
 exports.uploadFile = (req, path) => {
   return new Promise(async (resolve, reject) => {
+    let imageURL = [];
     if (!req.files?.length) {
-      return reject({ message: "File not found" });
+      return resolve(imageURL);
     }
 
-    let imageURL = [];
     let stream;
 
     for (let i = 0; i < req.files.length; i++) {
@@ -31,13 +31,14 @@ exports.uploadFile = (req, path) => {
     }
   })
     .then((upload) => {
-      console.log("Upload:", upload);
+      console.log("Upload images successfully");
       return {
         result: upload,
         success: true,
       };
     })
     .catch((err) => {
+      console.log("Fail to upload images");
       return {
         result: [err?.message || "Something goes wrong while uploading images"],
         success: false,

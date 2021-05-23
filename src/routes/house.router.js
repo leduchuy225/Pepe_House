@@ -1,19 +1,54 @@
 const router = require("express").Router();
 const houseController = require("../controller/house.controller");
 const { validateFile } = require("../utils/multer");
-const { authenticateToken } = require("../utils/jwt");
+const {
+  isValidID,
+  authenticateToken,
+  authenticateOwner,
+  authenticateRole,
+} = require("../config/middleware");
+const { Role } = require("../config/const");
 
-router.get("/details/:id", houseController.getHouseById);
-
-router.get("/list", houseController.getHouseList);
+router.get(
+  "/details/:houseId",
+  isValidID,
+  authenticateToken(true),
+  houseController.getHouseById
+);
 
 router.post(
   "/create",
-  // authenticateToken,
+  authenticateToken(),
+  // authenticateRole([Role.ADMIN, Role.SELLER]),
   validateFile,
   houseController.createHouse
 );
 
-router.delete("/delete/:id", authenticateToken, houseController.deleteHouse);
+router.put(
+  "/edit/:houseId",
+  isValidID,
+  authenticateToken(),
+  // authenticateRole([Role.ADMIN, Role.SELLER]),
+  authenticateOwner,
+  validateFile,
+  houseController.editHouse
+);
+
+router.delete(
+  "/delete/:houseId",
+  isValidID,
+  authenticateToken(),
+  authenticateOwner,
+  houseController.deleteHouse
+);
+
+router.put(
+  "/change-status/:houseId",
+  isValidID,
+  authenticateToken(),
+  authenticateRole([Role.ADMIN, Role.SELLER]),
+  authenticateOwner,
+  houseController.changeHouseStatus
+);
 
 module.exports = router;

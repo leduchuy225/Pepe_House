@@ -1,21 +1,18 @@
-const mongoose = require("mongoose");
+const House = require("../models/house.model");
 
 const isEmptyString = (str) => {
-  if (!str || str.trim() === "") {
-    return true;
-  }
+  if (!str || str.toString().trim() === "") return true;
   return false;
 };
 
 module.exports.hasEmptyField = (...fields) => {
   for (const field of fields) {
-    if (isEmptyString(field)) {
-      return true;
-    }
+    if (isEmptyString(field)) return true;
   }
   return false;
 };
 
-module.exports.isValidID = (id) => {
-  return mongoose.Types.ObjectId.isValid(id);
+module.exports.isHouseOwner = async (houseId, userID) => {
+  const house = await House.findOne({ _id: houseId, author: userID });
+  return house ? true : false;
 };

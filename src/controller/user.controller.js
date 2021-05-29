@@ -5,21 +5,28 @@ const House = require("../models/house.model");
 const { failureRes, successRes } = require("../config/response");
 
 module.exports.signUp = async (req, res) => {
-  const { displayName, username, password, confirmPassword } = req.body;
-  const { errors, valid } = validateSignUp(
+  const { displayName, username, phone, role, password, confirmPassword } =
+    req.body;
+  const { errors, valid } = validateSignUp({
     displayName,
     username,
+    phone,
+    role,
     password,
-    confirmPassword
-  );
-  if (!valid) {
-    return failureRes(req, res)(errors);
-  }
+    confirmPassword,
+  });
+  if (!valid) return failureRes(req, res)(errors);
   const user = await BaseUser.findOne({ username });
   if (user) {
     return failureRes(req, res)(["Username already exists"]);
   }
-  const commonUser = new BaseUser({ displayName, username, password });
+  const commonUser = new BaseUser({
+    displayName,
+    username,
+    phone,
+    role,
+    password,
+  });
   try {
     await commonUser.save();
     return successRes(req, res)({ user: commonUser });
@@ -30,14 +37,12 @@ module.exports.signUp = async (req, res) => {
 
 module.exports.signIn = async (req, res) => {
   const { username, password } = req.body;
-  const { errors, valid } = validateSignIn(username, password);
+  const { errors, valid } = validateSignIn({ username, password });
   const err = [];
-  if (!valid) {
-    return failureRes(req, res, 401)(errors);
-  }
-  const user = await BaseUser.findOne({ username }, { password: 0 });
+  if (!valid) return failureRes(req, res, 401)(errors);
+  const user = await BaseUser.findOne({ username, password }, { password: 0 });
   if (!user) {
-    err.push("Username is not found. Invalid login credentials");
+    err.push("Invalid login credentials");
     return failureRes(req, res)(err);
   }
   const accessToken = generateToken(user);
@@ -45,13 +50,12 @@ module.exports.signIn = async (req, res) => {
   return successRes(req, res)({ user: userInfo });
 };
 
-module.exports.profile = (req, res) => {
-  return successRes(req, res)({ user: req.user });
-};
-
-module.exports.myHouse = async (req, res) => {
-  const houses = await House.find({ author: req.user._id });
-  return successRes(req, res)({ houses });
+module.exports.profile = async (req, res) => {
+  const houses = await House.find(
+    { author: req.user._id },
+    { author: 0, reviews: 0 }
+  );
+  return successRes(req, res)({ user: { ...req.user, houses } });
 };
 
 module.exports.changeUserRole = async (req, res) => {

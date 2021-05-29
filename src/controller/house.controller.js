@@ -2,10 +2,10 @@ const { validateHouse } = require("../config/validator");
 const { failureRes, successRes } = require("../config/response");
 const { uploadFile } = require("../utils/cloudinary");
 const House = require("../models/house.model");
-const { Role, HouseStatus } = require("../config/const");
+const { Role, HouseStatus, PAGE, PER_PAGE } = require("../config/const");
 
 module.exports.getHouseById = async (req, res) => {
-  const house = await House.findOne({ _id: req.params.houseId });
+  const house = await House.findOne({ _id: req.params.houseId }).cache();
   if (!house) return failureRes(req, res)(["House not found"]);
   if ([HouseStatus.PENDING, HouseStatus.REJECTED].includes(house.status)) {
     if (
@@ -16,7 +16,7 @@ module.exports.getHouseById = async (req, res) => {
       return failureRes(req, res)(["House not found"]);
   }
   await house
-    .populate("author", "displayName")
+    .populate("author", "displayName phone")
     .populate({
       path: "reviews",
       options: {
@@ -29,11 +29,16 @@ module.exports.getHouseById = async (req, res) => {
 };
 
 module.exports.createHouse = async (req, res) => {
-  const { name, address, description } = req.body;
-  const { errors, valid } = validateHouse(name, address, description);
-  if (!valid) {
-    return failureRes(req, res)(errors);
-  }
+  const { name, address, description, price, area, contact, phone } = req.body;
+  const { errors, valid } = validateHouse({
+    name,
+    address,
+    description,
+    price,
+    area,
+    phone,
+  });
+  if (!valid) return failureRes(req, res)(errors);
   const { result, success } = await uploadFile(req, name);
   if (!success) {
     return failureRes(req, res)(result);
@@ -42,6 +47,10 @@ module.exports.createHouse = async (req, res) => {
     name,
     address,
     description,
+    price,
+    area,
+    contact,
+    phone,
     images: result,
     author: req.user._id,
   });
@@ -54,11 +63,16 @@ module.exports.createHouse = async (req, res) => {
 };
 
 module.exports.editHouse = async (req, res) => {
-  const { name, address, description } = req.body;
-  const { errors, valid } = validateHouse(name, address, description);
-  if (!valid) {
-    return failureRes(req, res)(errors);
-  }
+  const { name, address, description, price, area, contact, phone } = req.body;
+  const { errors, valid } = validateHouse({
+    name,
+    address,
+    description,
+    price,
+    area,
+    phone,
+  });
+  if (!valid) return failureRes(req, res)(errors);
   const { result, success } = await uploadFile(req, name);
   if (!success) {
     return failureRes(req, res)(result);
@@ -70,7 +84,9 @@ module.exports.editHouse = async (req, res) => {
         name,
         address,
         description,
-        images: result.imageURL,
+        price,
+        status: HouseStatus.PENDING,
+        images: result,
       }
     );
     return successRes(req, res)(house);
@@ -98,4 +114,25 @@ module.exports.changeHouseStatus = async (req, res) => {
     return failureRes(req, res)([err?.message]);
   }
   return successRes(req, res)({ message: "Change house status successfully" });
+};
+
+module.exports.searchHouse = async (req, res) => {
+  const regex = new RegExp(req.query.keyword, "i");
+  const page = parseInt(req.query?.page || PAGE);
+  const perPage = parseInt(req.query?.perPage || PER_PAGE);
+  const order = parseInt(req.query?.order || -1);
+  const sortBy = req.query?.sortBy || "createAt";
+
+  let option = { name: { $regex: regex } };
+  if (req.user?.role !== Role.ADMIN) {
+    option = {
+      ...option,
+      status: { $in: [HouseStatus.SELLING, HouseStatus.SOLD] },
+    };
+  }
+  const houses = await House.find(option)
+    .sort({ [sortBy]: [order] })
+    .skip(page * perPage - perPage)
+    .limit(perPage);
+  return successRes(req, res)({ houses }, { page, perPage, sortBy, order });
 };

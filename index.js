@@ -1,13 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const { connect } = require("mongoose");
-const { env } = require("./src/config/const");
 
-const app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+require("./src/utils/redis");
 
 const options = {
   useUnifiedTopology: true,
@@ -15,22 +10,29 @@ const options = {
   useFindAndModify: true,
 };
 
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+
+connectToMongoDB();
+
 app.get("/", (req, res) => {
   res.send("Welcome to my app");
 });
 
 app.use("/api/users", require("./src/routes/user.router"));
 app.use("/api/houses", require("./src/routes/house.router"));
-app.use("/api/search", require("./src/routes/search.router"));
 app.use("/api/review", require("./src/routes/review.router"));
 
-app.listen(env.PORT, () => console.log("Server is running on", env.PORT));
+app.listen(process.env.PORT, () =>
+  console.log("Server is running on", process.env.PORT)
+);
 
-const connectToServer = () => {
-  connect(env.MONGO_URL, options, (err) => {
-    if (err) return console.log("Fail to connect database");
-    console.log("Successfully connecting to database");
+function connectToMongoDB() {
+  connect(process.env.MONGO_URL, options, (err) => {
+    if (err) return console.log("Fail to connect Mongo DB");
+    console.log("Connecting to Mongo DB");
   });
-};
-
-connectToServer();
+}

@@ -23,14 +23,15 @@ module.exports.authenticateToken =
     const token = authHeader && authHeader.split(" ")[1];
     if (!token && !withoutToken) {
       return failureRes(req, res, 401)(["Unauthorized"]);
-    }
-    jwt.verify(token, env.ACCESS_TOKEN_SECRET, (err, data) => {
-      if (err) {
-        return failureRes(req, res, 403)(["Forbidden"]);
-      }
-      req.user = data.user;
-      next();
-    });
+    } else if (token) {
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+        if (err) {
+          return failureRes(req, res, 403)(["Forbidden"]);
+        }
+        req.user = data.user;
+        next();
+      });
+    } else next();
   };
 
 module.exports.authenticateRole = (roles) => (req, res, next) => {

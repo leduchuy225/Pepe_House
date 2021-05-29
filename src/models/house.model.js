@@ -24,18 +24,29 @@ const HouseSchema = new Schema({
     ],
     default: HouseStatus.PENDING,
   },
+  price: { type: Number, required: true },
+  area: { type: Number, required: true },
+  contact: String,
+  phone: String,
   // coordinates: { type: [Number], required: true },
   images: [{ type: String }],
-  author: {
-    type: Schema.Types.ObjectId,
-    ref: "BaseUser",
-  },
   reviews: [
     {
       type: Schema.Types.ObjectId,
       ref: "Review",
     },
   ],
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: "BaseUser",
+  },
+  createAt: {
+    type: Date,
+    default: Date.now,
+  },
+  expireAt: {
+    type: Date,
+  },
 });
 
 module.exports = model("House", HouseSchema);

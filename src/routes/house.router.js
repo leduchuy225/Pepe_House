@@ -9,6 +9,8 @@ const {
 } = require("../config/middleware");
 const { Role } = require("../config/const");
 
+router.get("/search", authenticateToken(true), houseController.searchHouse);
+
 router.get(
   "/details/:houseId",
   isValidID,
@@ -19,7 +21,7 @@ router.get(
 router.post(
   "/create",
   authenticateToken(),
-  // authenticateRole([Role.ADMIN, Role.SELLER]),
+  authenticateRole([Role.ADMIN, Role.SELLER]),
   validateFile,
   houseController.createHouse
 );

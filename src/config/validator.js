@@ -1,6 +1,6 @@
 const { hasEmptyField } = require("./helper");
 
-module.exports.validateSignIn = (username, password) => {
+module.exports.validateSignIn = ({ username, password }) => {
   const errors = [];
 
   if (hasEmptyField(username, password)) {
@@ -13,14 +13,20 @@ module.exports.validateSignIn = (username, password) => {
   };
 };
 
-module.exports.validateSignUp = (
+module.exports.validateSignUp = ({
   displayName,
   username,
+  phone,
+  role,
   password,
-  confirmPassword
-) => {
+  confirmPassword,
+}) => {
   const errors = [];
-  if (hasEmptyField(displayName, username, password, confirmPassword)) {
+  if (phone && !phone.match(/^[0-9]+$/)) {
+    errors.push("Invalid phone number");
+  } else if (
+    hasEmptyField(displayName, username, role, password, confirmPassword)
+  ) {
     errors.push("Required fields are empty");
   } else if (password !== confirmPassword) {
     errors.push("Password must match with confirm password");
@@ -32,10 +38,23 @@ module.exports.validateSignUp = (
   };
 };
 
-module.exports.validateHouse = (name, address, description) => {
+module.exports.validateHouse = ({
+  name,
+  address,
+  description,
+  price,
+  area,
+  phone,
+}) => {
   const errors = [];
-  if (hasEmptyField(name, address, description)) {
+  if (hasEmptyField(name, address, description, price, area)) {
     errors.push("Required fields are empty");
+  } else if (isNaN(price)) {
+    errors.push("Invalid price");
+  } else if (isNaN(area)) {
+    errors.push("Invalid area");
+  } else if (phone && !phone.match(/^[0-9]+$/)) {
+    errors.push("Invalid phone number");
   }
   /* if (!coordinates || coordinates.length !== 2) {
     errors.push("Invalid coordinate");
@@ -51,7 +70,7 @@ module.exports.validateHouse = (name, address, description) => {
   return { errors, valid: errors.length < 1 };
 };
 
-module.exports.validateReview = (point, content) => {
+module.exports.validateReview = ({ point, content }) => {
   const errors = [];
   if (hasEmptyField(point, content)) {
     errors.push("Required fields are empty");

@@ -9,13 +9,6 @@ router.post("/sign-in", userController.signIn);
 
 router.get("/profile", authenticateToken(), userController.profile);
 
-router.get(
-  "/my-house",
-  authenticateToken(),
-  authenticateRole([Role.ADMIN, Role.SELLER]),
-  userController.myHouse
-);
-
 router.put(
   "/change-role/:userId",
   authenticateToken(),

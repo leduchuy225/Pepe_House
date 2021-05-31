@@ -26,6 +26,12 @@ const BaseUserSchema = new Schema(
       type: String,
     },
     avatar: String,
+    notifications: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Notification",
+      },
+    ],
   },
   options
 );

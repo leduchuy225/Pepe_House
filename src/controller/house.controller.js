@@ -1,11 +1,14 @@
+const House = require("../models/house.model");
 const { validateHouse } = require("../config/validator");
 const { failureRes, successRes } = require("../config/response");
 const { uploadFile } = require("../utils/cloudinary");
-const House = require("../models/house.model");
 const { Role, HouseStatus, PAGE, PER_PAGE } = require("../config/const");
+const { saveNotification } = require("./notification.controller");
 
 module.exports.getHouseById = async (req, res) => {
-  const house = await House.findOne({ _id: req.params.houseId }).cache();
+  const house = await House.findOne({
+    _id: req.params.houseId,
+  });
   if (!house) return failureRes(req, res)(["House not found"]);
   if ([HouseStatus.PENDING, HouseStatus.REJECTED].includes(house.status)) {
     if (
@@ -55,7 +58,12 @@ module.exports.createHouse = async (req, res) => {
     author: req.user._id,
   });
   try {
-    await house.save();
+    await house.save().then((data) => {
+      saveNotification({
+        userId: req.user._id,
+        content: `A house ${data.name} with id ${data._id} was created`,
+      });
+    });
     return successRes(req, res)(house);
   } catch (err) {
     return failureRes(req, res)([err?.message]);
@@ -64,7 +72,7 @@ module.exports.createHouse = async (req, res) => {
 
 module.exports.editHouse = async (req, res) => {
   const { name, address, description, price, area, contact, phone } = req.body;
-  const { errors, valid } = validateHouse({
+  /* const { errors, valid } = validateHouse({
     name,
     address,
     description,
@@ -72,7 +80,7 @@ module.exports.editHouse = async (req, res) => {
     area,
     phone,
   });
-  if (!valid) return failureRes(req, res)(errors);
+  if (!valid) return failureRes(req, res)(errors); */
   const { result, success } = await uploadFile(req, name);
   if (!success) {
     return failureRes(req, res)(result);
@@ -87,6 +95,12 @@ module.exports.editHouse = async (req, res) => {
         price,
         status: HouseStatus.PENDING,
         images: result,
+      },
+      (err, data) => {
+        saveNotification({
+          userId: data.author,
+          content: `House ${data.name} with id ${data._id} was updated`,
+        });
       }
     );
     return successRes(req, res)(house);
@@ -97,7 +111,12 @@ module.exports.editHouse = async (req, res) => {
 
 module.exports.deleteHouse = async (req, res) => {
   try {
-    await House.deleteOne({ _id: req.params.houseId });
+    await House.findOneAndDelete({ _id: req.params.houseId }, (err, data) => {
+      saveNotification({
+        userId: data.author,
+        content: `House ${data.name} with id ${data._id} was deleted`,
+      });
+    });
     return successRes(req, res)({ message: "Delete house successfully" });
   } catch (error) {
     return failureRes(req, res)([error?.message]);
@@ -106,9 +125,15 @@ module.exports.deleteHouse = async (req, res) => {
 
 module.exports.changeHouseStatus = async (req, res) => {
   try {
-    await House.updateOne(
+    await House.findOneAndUpdate(
       { _id: req.params.houseId },
-      { status: req.body.status }
+      { status: req.body.status },
+      (err, data) => {
+        saveNotification({
+          userId: data.author,
+          content: `House ${data.name} with id ${data._id} was changed status`,
+        });
+      }
     );
   } catch (error) {
     return failureRes(req, res)([err?.message]);

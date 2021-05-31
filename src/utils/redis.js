@@ -23,7 +23,7 @@ client.on("error", (err) => {
 // create new cache function on prototype
 mongoose.Query.prototype.cache = function (options) {
   this.useCache = true;
-  this.expire = options?.expire || 60;
+  this.expire = options?.expire || 60; // 60 seconds
   this.hashKey = JSON.stringify(options?.key || this.mongooseCollection.name);
 
   return this;
@@ -34,7 +34,7 @@ const exec = mongoose.Query.prototype.exec;
 
 // override exec function to first check cache for data
 mongoose.Query.prototype.exec = async function () {
-  console.log("Running exec");
+  console.log("Executing");
 
   if (!this.useCache) {
     return await exec.apply(this, arguments);
@@ -66,8 +66,6 @@ mongoose.Query.prototype.exec = async function () {
     : new this.model(doc);
 };
 
-module.exports = {
-  clearHash(hashKey) {
-    client.del(JSON.stringify(hashKey));
-  },
+exports.clearHash = (hashKey) => {
+  client.del(JSON.stringify(hashKey));
 };

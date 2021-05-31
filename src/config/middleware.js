@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const { Role } = require("../config/const");
-const { isHouseOwner } = require("../config/helper");
+const { isHouseOwner, isReviewOwner } = require("../config/helper");
 const { failureRes } = require("../config/response");
 const { env } = require("../config/const");
 
@@ -40,11 +40,17 @@ module.exports.authenticateRole = (roles) => (req, res, next) => {
     : next();
 };
 
-module.exports.authenticateOwner = (req, res, next) => {
-  if (req.user.role === Role.ADMIN) return next();
-  else {
-    isHouseOwner(req.params.id, req.user._id)
-      ? next()
-      : failureRes(req, res, 401)(["Unauthorized"]);
-  }
-};
+module.exports.authenticateOwner =
+  (type, adminPermisson = true) =>
+  (req, res, next) => {
+    if (req.user.role === Role.ADMIN && adminPermisson) return next();
+    else if (type === "house") {
+      isHouseOwner(req.params.id, req.user._id)
+        ? next()
+        : failureRes(req, res, 401)(["Unauthorized"]);
+    } else if (type === "review") {
+      isReviewOwner(req.params.id, req.user._id)
+        ? next()
+        : failureRes(req, res, 401)(["Unauthorized"]);
+    } else failureRes(req, res, 401)(["Unauthorized"]);
+  };

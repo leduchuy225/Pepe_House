@@ -38,7 +38,9 @@ module.exports.editReview = async (req, res) => {
 
 module.exports.deleteReview = async (req, res) => {
   try {
-    await Review.deleteOne({ _id: req.params.reviewId });
+    const result = await Review.deleteOne({ _id: req.params.reviewId });
+    if (!result.deletedCount) throw new Error("Review not found");
+
     return successRes(req, res)({ message: "Delete review successfully" });
   } catch (error) {
     return failureRes(req, res)([error?.message]);

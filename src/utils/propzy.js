@@ -1,13 +1,14 @@
 /* 
-  Example
-  How to crawl data from a website
+  Crawl data from a Propzy
 */
 
 const rp = require(`request-promise`);
 const cheerio = require(`cheerio`);
-// const { MongoClient } = require(`mongodb`);
+const { connect } = require("mongoose");
+const { HouseStatus } = require("../config/const");
+const House = require("../models/house.model");
 
-const list_type = [
+/* const list_type = [
   "mua/nha/hcm",
   "mua/can-ho/hcm",
   "mua/dat-nen/hcm",
@@ -15,56 +16,65 @@ const list_type = [
   "thue/nha/hcm",
   "thue/can-ho/hcm",
 ];
-const CategoryId = [2, 1, 5, 5, 13, 12];
-const pageIn = [24667, 441, 406, 2, 1282, 722];
+const pageIn = [24667, 441, 406, 2, 1282, 722]; */
 
-/* MongoClient.connect(`mongodb://localhost:27017/crawl`)
-  .then((db) => {
-    run(db, 1, list_type[0], 0);
-  })
-  .catch(console.log); */
+const options = {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useFindAndModify: true,
+};
 
-db = null;
+const list_type = ["mua/nha/hcm"];
+const pageIn = [1];
 
-run(db, 1, list_type[0], 0);
+connect(process.env.MONGO_URL, options, (err) => {
+  if (err) return console.log("Fail to connect Mongo DB");
+  console.log("Connecting to Mongo DB");
+});
 
-function run(db, page, type, index) {
+run(1, list_type[0], 0);
+
+function run(page, type, index) {
   console.log(`running ${page} - ${type} - ${index} `);
-  getPage(page, type)
-    .then((data) => {
-      console.log(data);
-      data.forEach((de) => {
-        getDetail(de)
-          .then((ts) => {
-            ts.category = CategoryId[index];
-            console.log(ts);
-            if (ts.lat != NaN) {
-              db.collection("data").insert(ts);
-            }
-          })
-          .catch(console.log);
-      });
-      if (index < list_type.length) {
-        setTimeout(() => {
-          if (page < pageIn[index]) {
-            run(db, page + 1, list_type[index], index);
-          } else {
-            page = 0;
-            index = index + 1;
-            run(db, page + 1, list_type[index], index);
-          }
-          //run(db, page + 1, type)
-        }, 5 * 1000);
-      }
-    })
-    .catch(console.log);
+  getPage(page, type).then((data) => {
+    console.log(data);
+    data.forEach((de) => {
+      getDetail(de)
+        .then(async (ts) => {
+          console.log(ts);
+          /* if (ts.lat != NaN) {
+            await new House(ts).save().then(() => {
+              console.log("Added a new house");
+              // process.exit(1);
+            });
+          } */
+        })
+        .catch((err) => {
+          console.log(err);
+          process.exit(1);
+        });
+    });
+    if (index < list_type.length) {
+      setTimeout(() => {
+        if (page < pageIn[index]) {
+          run(db, page + 1, list_type[index], index);
+        } else return;
+        /* else {
+          page = 0;
+          index = index + 1;
+          run(db, page + 1, list_type[index], index);
+        } */
+        //run(db, page + 1, type)
+      }, 5 * 1000);
+    }
+  });
+  // .catch(console.log);
 }
-//2627
 
 function getPage(page, type) {
   return new Promise((resolve, reject) => {
     rp({
-      url: `https://propzy.vn/${type}?src=mega_menu&p=${page}`,
+      url: `https://propzy.vn/${type}/p${page}`,
     })
       .then((body) => {
         const $ = cheerio.load(body);
@@ -81,10 +91,6 @@ function getPage(page, type) {
   });
 }
 
-const remove_text = (text) => {
-  return text.replace(/\\n\&nbsp;/g, "").trim();
-};
-//getDetail('/ban-can-office-tel-republic-cong-hoa-50m2-tang-6-gia-239ty-alo-0908982299-xem-nha-es1209508?src=home_box_product')
 function getDetail(link) {
   return new Promise((resolve, reject) => {
     rp({
@@ -92,7 +98,6 @@ function getDetail(link) {
     })
       .then((body) => {
         const $ = cheerio.load(body);
-        const site = "propzy.vn";
         const title = remove_text(
           $("body")
             .find(
@@ -121,24 +126,6 @@ function getDetail(link) {
             )
             .text()
         );
-        const huongnha = remove_text(
-          $("body")
-            .find(
-              "div#wrapper > #main > div > div > div:nth-child(1) > div.row.list-item.t-detail-s > div.col-lg-8 > div.bl-parameter-listing > ul > li:nth-child(4) > span.sp-info"
-            )
-            .text()
-        );
-        const huong_ban_cong = "";
-        const so_tang = cutStr(body, '"numberFloor":', ",");
-        const house_project = remove_text(
-          $("body")
-            .find(
-              "div#wrapper > main#main.sec-tb.p-project-detail > div.container.z-10 > div.row > div.col-lg-12.col-md-12 > div.row.list-item.t-detail-s > div.col-lg-8 > div.t-detail > p.p-project"
-            )
-            .text()
-        );
-        const phaply = "";
-        const category = "";
         const desc = remove_text(
           $("body").find("#tab-detail > div > div").text()
         );
@@ -149,68 +136,34 @@ function getDetail(link) {
             )
             .text()
         );
-        const toilet = remove_text(
-          $("body")
-            .find(
-              "#main > div > div > div:nth-child(1) > div.row.list-item.t-detail-s > div.col-lg-8 > div.bl-parameter-listing > ul > li:nth-child(2) > span.sp-info"
-            )
-            .text()
-        );
-        const bed = remove_text(
-          $("body")
-            .find(
-              "#main > div > div > div:nth-child(1) > div.row.list-item.t-detail-s > div.col-lg-8 > div.bl-parameter-listing > ul > li:nth-child(1) > span.sp-info"
-            )
-            .text()
-        );
         const lat = cutStr(body, '"latitude":', ",");
         const lon = cutStr(body, '"longitude":', ",");
-        const duong_vao = "";
-        const mat_tien = cutStr(body, '"formatSizeWidth":"', 'm"');
-        const num_living = "";
-        const noi_that = "";
-        const chieu_dai = cutStr(body, '"formatSizeLength":"', 'm"');
-        const chieu_ngang = cutStr(body, '"formatSizeWidth":"', 'm"');
-        const toa_nha = "";
         const list_img = [];
         $(".tRes_60").each((index, item) => {
           list_img.push($(item).find("img").attr("src"));
         });
-        const obj = {
-          title: title,
-          category: parseInt(category),
-          site: site,
-          link: link,
+        const description =
+          (desc ? desc + "\n" : "") + createDescription($, body);
+        resolve({
+          name: title,
           address: add,
-          price: price,
+          price: parseFloat(price),
           area: parseFloat(area),
-          description: desc,
-          house_type: housing_type,
-          house_direc: huongnha,
-          house_balcony: huong_ban_cong,
-          house_project: house_project,
-          facade: parseFloat(mat_tien),
-          road_house: parseFloat(duong_vao),
-          lon: parseFloat(lon),
-          lat: parseFloat(lat),
-          num_floor: parseInt(so_tang),
-          num_bed: parseInt(bed),
-          num_bath: parseInt(toilet),
-          num_living: parseInt(num_living),
-          furniture: noi_that,
-          juridical: phaply,
-          width: parseFloat(chieu_ngang),
-          length: parseFloat(chieu_dai),
-          the_building: toa_nha,
-          list_img: list_img,
-        };
-
-        resolve(obj);
+          description: description,
+          status: housing_type === "Bán" ? HouseStatus.SELLING : housing_type,
+          longitude: parseFloat(lon), // Kinh do
+          latitude: parseFloat(lat), // Vi do
+          images: list_img,
+        });
       })
       .catch((error) => {
         reject(error);
       });
   });
+}
+
+function remove_text(text) {
+  return text.replace(/\\n\&nbsp;/g, "").trim();
 }
 
 function cutStr(str, start, end) {
@@ -219,4 +172,42 @@ function cutStr(str, start, end) {
     let temp = str.slice(startPos + start.length);
     return temp.slice(0, temp.indexOf(end));
   } else return "";
+}
+
+function createDescription($, body) {
+  let description = "";
+  const site = "propzy.vn";
+  description += site && `Site: ${site}\n`;
+  const huongnha = remove_text(
+    $("body")
+      .find(
+        "div#wrapper > #main > div > div > div:nth-child(1) > div.row.list-item.t-detail-s > div.col-lg-8 > div.bl-parameter-listing > ul > li:nth-child(4) > span.sp-info"
+      )
+      .text()
+  );
+  description += huongnha && `Hướng nhà: ${huongnha}\n`;
+  const so_tang = cutStr(body, '"numberFloor":', ",");
+  description += so_tang && `Số tầng: ${so_tang}\n`;
+  const toilet = remove_text(
+    $("body")
+      .find(
+        "#main > div > div > div:nth-child(1) > div.row.list-item.t-detail-s > div.col-lg-8 > div.bl-parameter-listing > ul > li:nth-child(2) > span.sp-info"
+      )
+      .text()
+  );
+  description += toilet && `Toilet: ${toilet}\n`;
+  const bed = remove_text(
+    $("body")
+      .find(
+        "#main > div > div > div:nth-child(1) > div.row.list-item.t-detail-s > div.col-lg-8 > div.bl-parameter-listing > ul > li:nth-child(1) > span.sp-info"
+      )
+      .text()
+  );
+  description += bed && `Giường ngủ: ${bed}\n`;
+  const chieu_dai = cutStr(body, '"formatSizeLength":"', 'm"');
+  description += chieu_dai && `Chiều dài: ${chieu_dai}\n`;
+  const chieu_ngang = cutStr(body, '"formatSizeWidth":"', 'm"');
+  description += chieu_ngang && `Chiều rộng: ${chieu_ngang}\n`;
+
+  return description;
 }

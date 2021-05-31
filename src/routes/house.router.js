@@ -31,7 +31,7 @@ router.put(
   isValidID,
   authenticateToken(),
   // authenticateRole([Role.ADMIN, Role.SELLER]),
-  authenticateOwner,
+  authenticateOwner("house", false),
   validateFile,
   houseController.editHouse
 );
@@ -40,7 +40,7 @@ router.delete(
   "/delete/:houseId",
   isValidID,
   authenticateToken(),
-  authenticateOwner,
+  authenticateOwner("house", false),
   houseController.deleteHouse
 );
 
@@ -49,7 +49,7 @@ router.put(
   isValidID,
   authenticateToken(),
   authenticateRole([Role.ADMIN, Role.SELLER]),
-  authenticateOwner,
+  authenticateOwner("house"),
   houseController.changeHouseStatus
 );
 

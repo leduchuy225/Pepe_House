@@ -28,7 +28,8 @@ const HouseSchema = new Schema({
   area: { type: Number, required: true },
   contact: String,
   phone: String,
-  // coordinates: { type: [Number], required: true },
+  longitude: Number,
+  latitude: Number,
   images: [{ type: String }],
   reviews: [
     {

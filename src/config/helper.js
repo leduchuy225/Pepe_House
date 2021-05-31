@@ -16,3 +16,8 @@ module.exports.isHouseOwner = async (houseId, userID) => {
   const house = await House.findOne({ _id: houseId, author: userID });
   return house ? true : false;
 };
+
+module.exports.isReviewOwner = async (reviewId, userID) => {
+  const review = await Review.findOne({ _id: reviewId, author: userID });
+  return review ? true : false;
+};

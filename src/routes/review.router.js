@@ -17,7 +17,7 @@ router.put(
   "/edit/:reviewId",
   isValidID,
   authenticateToken(),
-  authenticateOwner,
+  authenticateOwner("review", false),
   reviewController.editReview
 );
 
@@ -25,7 +25,7 @@ router.delete(
   "/delete/:reviewId",
   isValidID,
   authenticateToken(),
-  authenticateOwner,
+  authenticateOwner("review"),
   reviewController.deleteReview
 );
 

@@ -8,17 +8,18 @@ module.exports.postReview = async (req, res) => {
   const { errors, valid } = validateReview({ point, content });
   if (!valid) return failureRes(req, res)([errors]);
   const review = new Review({ point, content, author: req.user._id });
-  try {
-    await review.save().then(async (review) => {
-      await House.updateOne(
+
+  await review
+    .save()
+    .then(async (review) => {
+      const response = await House.updateOne(
         { _id: req.params.houseId },
         { $push: { reviews: review._id } }
       );
-    });
-    return successRes(req, res)({ review });
-  } catch (error) {
-    return failureRes(req, res)([error?.message]);
-  }
+      if (!response.nModified) throw new Error("House not found");
+      return successRes(req, res)({ review });
+    })
+    .catch((error) => failureRes(req, res)([error?.message]));
 };
 
 module.exports.editReview = async (req, res) => {

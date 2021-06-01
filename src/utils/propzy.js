@@ -27,7 +27,7 @@ const options = {
 const list_type = ["mua/nha/hcm"];
 const pageIn = [1];
 
-connect(process.env.MONGO_URL, options, (err) => {
+connect("mongo_url", options, (err) => {
   if (err) return console.log("Fail to connect Mongo DB");
   console.log("Connecting to Mongo DB");
 });
@@ -36,39 +36,39 @@ run(1, list_type[0], 0);
 
 function run(page, type, index) {
   console.log(`running ${page} - ${type} - ${index} `);
-  getPage(page, type).then((data) => {
-    console.log(data);
-    data.forEach((de) => {
-      getDetail(de)
-        .then(async (ts) => {
-          console.log(ts);
-          /* if (ts.lat != NaN) {
-            await new House(ts).save().then(() => {
-              console.log("Added a new house");
-              // process.exit(1);
-            });
-          } */
-        })
-        .catch((err) => {
-          console.log(err);
-          process.exit(1);
-        });
-    });
-    if (index < list_type.length) {
+  getPage(page, type)
+    .then((data) => {
+      console.log(data);
+      // console.log(data.length);
+
+      data.forEach((de) => {
+        getDetail(de)
+          .then(async (ts) => {
+            console.log(ts);
+            if (ts.lat != NaN) {
+              await new House(ts).save();
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            process.exit(1);
+          });
+      });
+      /* if (index < list_type.length) {
       setTimeout(() => {
         if (page < pageIn[index]) {
           run(db, page + 1, list_type[index], index);
-        } else return;
-        /* else {
+        } else process.exit(1);
+        else {
           page = 0;
           index = index + 1;
           run(db, page + 1, list_type[index], index);
-        } */
+        }
         //run(db, page + 1, type)
       }, 5 * 1000);
-    }
-  });
-  // .catch(console.log);
+    } */
+    })
+    .catch(console.log);
 }
 
 function getPage(page, type) {
@@ -79,10 +79,12 @@ function getPage(page, type) {
       .then((body) => {
         const $ = cheerio.load(body);
         const list = [];
-        $(".listing-card").each((index, item) => {
-          const a = $(item).find("a")[0];
-          list.push($(a).attr("href"));
-        });
+        $(".item-listing.listing-card.view-as-grid.item-compare").each(
+          (index, item) => {
+            const a = $(item).find("a")[0];
+            list.push($(a).attr("href"));
+          }
+        );
         resolve(list);
       })
       .catch((error) => {
@@ -151,9 +153,10 @@ function getDetail(link) {
           area: parseFloat(area),
           description: description,
           status: housing_type === "Bán" ? HouseStatus.SELLING : housing_type,
-          longitude: parseFloat(lon), // Kinh do
-          latitude: parseFloat(lat), // Vi do
+          location: { coordinates: [parseFloat(lon), parseFloat(lat)] },
           images: list_img,
+          contact: "Tiep Bip",
+          phone: "123456789",
         });
       })
       .catch((error) => {

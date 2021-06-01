@@ -1,4 +1,6 @@
 const House = require("../models/house.model");
+const { BaseUser } = require("../models/user.model");
+const Notification = require("../models/notification.model");
 
 const isEmptyString = (str) => {
   if (!str || str.toString().trim() === "") return true;
@@ -20,4 +22,15 @@ module.exports.isHouseOwner = async (houseId, userID) => {
 module.exports.isReviewOwner = async (reviewId, userID) => {
   const review = await Review.findOne({ _id: reviewId, author: userID });
   return review ? true : false;
+};
+
+module.exports.saveNotification = async ({ userId, content }) => {
+  console.log("New notification !!!");
+
+  await new Notification({ content }).save().then(async (data) => {
+    await BaseUser.updateOne(
+      { _id: userId },
+      { $push: { notifications: data._id } }
+    );
+  });
 };

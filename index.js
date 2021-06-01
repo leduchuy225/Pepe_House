@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { connect } = require("mongoose");
 
-// require("./src/utils/redis");
+require("./src/utils/redis");
 
 const options = {
   useUnifiedTopology: true,
@@ -25,7 +25,6 @@ app.get("/", (req, res) => {
 app.use("/api/users", require("./src/routes/user.router"));
 app.use("/api/houses", require("./src/routes/house.router"));
 app.use("/api/review", require("./src/routes/review.router"));
-app.use("/api/notifications", require("./src/routes/notification.router"));
 
 app.listen(process.env.PORT, () =>
   console.log("Server is running on", process.env.PORT)

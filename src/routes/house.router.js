@@ -9,6 +9,7 @@ const {
 } = require("../config/middleware");
 const { Role } = require("../config/const");
 
+router.get("/search/recommendation", houseController.searchRecommendHouse);
 router.get("/search", authenticateToken(true), houseController.searchHouse);
 
 router.get(

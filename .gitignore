@@ -2,3 +2,4 @@ docker-compose.yml
 .docker
 node_modules
 .env
+Todo.md

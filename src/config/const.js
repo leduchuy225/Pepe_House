@@ -1,12 +1,6 @@
-require("dotenv").config();
-
-if (!process.env.PORT) {
-  process.exit(1);
-}
-
 exports.LIMIT_SIZE = 1024 * 1024;
 exports.PAGE = 1;
-exports.PER_PAGE = 2;
+exports.PER_PAGE = 12;
 
 exports.Role = {
   COMMON_USER: "1",
@@ -16,7 +10,6 @@ exports.Role = {
 
 exports.HouseStatus = {
   PENDING: 1,
-  REJECTED: 2,
-  SELLING: 3,
-  SOLD: 4,
+  SELLING: 2,
+  SOLD: 3,
 };

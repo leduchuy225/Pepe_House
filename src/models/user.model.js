@@ -26,6 +26,12 @@ const BaseUserSchema = new Schema(
       type: String,
     },
     avatar: String,
+    favorite: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "House",
+      },
+    ],
     notifications: [
       {
         type: Schema.Types.ObjectId,

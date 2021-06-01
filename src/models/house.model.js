@@ -1,6 +1,19 @@
 const { Schema, model } = require("mongoose");
 const { HouseStatus } = require("../config/const");
 
+const pointSchema = new Schema({
+  type: {
+    type: String,
+    // enum: ["Point"],
+    default: "Point",
+    required: true,
+  },
+  coordinates: {
+    type: [Number],
+    required: true,
+  },
+});
+
 const HouseSchema = new Schema({
   name: {
     type: String,
@@ -14,22 +27,19 @@ const HouseSchema = new Schema({
     type: String,
     required: true,
   },
+  location: {
+    type: { type: String, default: "Point" },
+    coordinates: [Number],
+  },
   status: {
     type: Number,
-    enum: [
-      HouseStatus.PENDING,
-      HouseStatus.SELLING,
-      HouseStatus.SOLD,
-      HouseStatus.REJECTED,
-    ],
+    enum: [HouseStatus.PENDING, HouseStatus.SELLING, HouseStatus.SOLD],
     default: HouseStatus.PENDING,
   },
   price: { type: Number, required: true },
   area: { type: Number, required: true },
   contact: String,
   phone: String,
-  longitude: Number,
-  latitude: Number,
   images: [{ type: String }],
   reviews: [
     {
@@ -49,5 +59,7 @@ const HouseSchema = new Schema({
     type: Date,
   },
 });
+
+HouseSchema.index({ location: "2dsphere" });
 
 module.exports = model("House", HouseSchema);

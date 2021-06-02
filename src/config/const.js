@@ -8,6 +8,12 @@ exports.Role = {
   ADMIN: "3",
 };
 
+exports.RoleText = {
+  1: "Common User",
+  2: "Seller",
+  3: "Admin",
+};
+
 exports.HouseStatus = {
   PENDING: 1,
   SELLING: 2,

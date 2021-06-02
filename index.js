@@ -33,6 +33,6 @@ app.listen(process.env.PORT, () =>
 function connectToMongoDB() {
   connect(process.env.MONGO_URL, options, (err) => {
     if (err) return console.log("Fail to connect Mongo DB");
-    console.log("Connecting to Mongo DB");
+    console.log("Connecting to Mongo DB", process.env.MONGO_URL);
   });
 }

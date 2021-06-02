@@ -27,6 +27,7 @@ module.exports.isReviewOwner = async (reviewId, userID) => {
 
 module.exports.saveNotification = async ({ userId, content }) => {
   console.log("New notification !!!");
+  if (!userId) return;
 
   await new Notification({ content }).save().then(async (data) => {
     await BaseUser.updateOne(

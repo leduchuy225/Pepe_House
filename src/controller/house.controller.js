@@ -172,9 +172,7 @@ module.exports.changeHouseStatus = async (req, res) => {
         userId: data.author,
         content: `House ${data.name} with id ${
           data._id
-        } was changed status to ${
-          HouseStatusText[HouseStatus[req.body.status]]
-        }`,
+        } was changed status to ${HouseStatusText[req.body.status]}`,
       });
       return successRes(
         req,
@@ -201,7 +199,8 @@ module.exports.searchHouse = async (req, res) => {
   const houses = await House.find(option, { reviews: 0 })
     .sort({ [sortBy]: [order] })
     .skip(page * perPage - perPage)
-    .limit(perPage);
+    .limit(perPage)
+    .cache({ key: "house-search", expire: 60 * 3 });
   return successRes(req, res)({ houses }, { page, perPage, sortBy, order });
 };
 
@@ -220,7 +219,7 @@ module.exports.searchRecommendHouse = async (req, res) => {
           coordinates: [long, lat],
         },
         distanceField: "dist.calculated",
-        maxDistance: maxDistance || 1 * 1000, // meters
+        maxDistance: maxDistance || 6 * 1000, // meters
         spherical: true,
       },
     },

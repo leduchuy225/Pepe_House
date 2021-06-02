@@ -31,7 +31,7 @@ router.put(
   "/edit/:houseId",
   isValidID,
   authenticateToken(),
-  // authenticateRole([Role.ADMIN, Role.SELLER]),
+  authenticateRole([Role.ADMIN, Role.SELLER]),
   authenticateOwner("house", false),
   validateFile,
   houseController.editHouse

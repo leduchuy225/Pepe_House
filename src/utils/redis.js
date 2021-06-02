@@ -56,6 +56,7 @@ function loadDataFromCache(exec, type) {
       case "Query":
         key = JSON.stringify({
           ...this.getQuery(),
+          ...this.getOptions(),
           collection: this.mongooseCollection.name,
         });
         break;
@@ -72,8 +73,9 @@ function loadDataFromCache(exec, type) {
     // if cache value is not found, fetch data from mongodb and cache it
     if (!cacheValue) {
       const result = await exec.apply(this, arguments);
-      client.hset(this.hashKey, key, JSON.stringify(result));
-      client.expire(this.hashKey, this.expire);
+
+      await client.hset(this.hashKey, key, JSON.stringify(result));
+      await client.expire(this.hashKey, this.expire);
 
       console.log("Return data from MongoDB");
       return result;
@@ -88,6 +90,6 @@ function loadDataFromCache(exec, type) {
   };
 }
 
-exports.clearHash = (hashKey) => {
-  client.del(JSON.stringify(hashKey));
+exports.clearHash = async (hashKey) => {
+  await client.del(JSON.stringify(hashKey));
 };

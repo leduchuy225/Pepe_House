@@ -1,19 +1,6 @@
 const { Schema, model } = require("mongoose");
 const { HouseStatus } = require("../config/const");
 
-const pointSchema = new Schema({
-  type: {
-    type: String,
-    // enum: ["Point"],
-    default: "Point",
-    required: true,
-  },
-  coordinates: {
-    type: [Number],
-    required: true,
-  },
-});
-
 const HouseSchema = new Schema({
   name: {
     type: String,

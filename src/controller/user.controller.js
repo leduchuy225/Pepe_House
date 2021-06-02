@@ -5,6 +5,7 @@ const House = require("../models/house.model");
 const { failureRes, successRes } = require("../config/response");
 const { saveNotification } = require("../config/helper");
 const { clearHash } = require("../utils/redis");
+const { RoleText } = require("../config/const");
 
 module.exports.signUp = async (req, res) => {
   const { displayName, username, phone, role, password, confirmPassword } =
@@ -70,7 +71,7 @@ module.exports.changeUserRole = async (req, res) => {
       if (!result.nModified) throw new Error("Your role hasn't changed");
       await saveNotification({
         userId: req.params.userId,
-        content: `Your role has been changed to ${req.body.role}`,
+        content: `Your role has been changed to ${RoleText[req.body.role]}`,
       });
       return successRes(req, res)({ message: "Change user role successfully" });
     })

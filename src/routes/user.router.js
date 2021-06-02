@@ -44,6 +44,13 @@ router.put(
 );
 
 router.get(
+  "/list",
+  authenticateToken(),
+  authenticateRole([Role.ADMIN]),
+  userController.getUserList
+);
+
+router.get(
   "/notifications",
   authenticateToken(),
   userController.getNotificationList

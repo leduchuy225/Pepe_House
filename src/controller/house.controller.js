@@ -198,7 +198,7 @@ module.exports.searchHouse = async (req, res) => {
       status: { $in: [HouseStatus.SELLING, HouseStatus.SOLD] },
     };
   }
-  const houses = await House.find(option)
+  const houses = await House.find(option, { reviews: 0 })
     .sort({ [sortBy]: [order] })
     .skip(page * perPage - perPage)
     .limit(perPage);
@@ -226,7 +226,7 @@ module.exports.searchRecommendHouse = async (req, res) => {
     },
     { $project: { reviews: 0, author: 0 } },
   ])
-    .cache({ key: "near-house", expire: 60 * 5 })
+    .cache({ key: "near-house", expire: 60 * 6 })
     .then((data) => {
       return successRes(req, res)({ houses: data });
     })

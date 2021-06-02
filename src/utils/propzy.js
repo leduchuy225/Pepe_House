@@ -2,6 +2,8 @@
   Crawl data from a Propzy
 */
 
+require("dotenv").config();
+
 const rp = require(`request-promise`);
 const cheerio = require(`cheerio`);
 const { connect } = require("mongoose");
@@ -27,16 +29,12 @@ const options = {
 const list_type = ["mua/nha/hcm"];
 const pageIn = [2];
 
-connect(
-  "mongodb+srv://admin:admin@cluster0.90ul9.mongodb.net/pepe-house?retryWrites=true&w=majority",
-  options,
-  (err) => {
-    if (err) return console.log("Fail to connect Mongo DB");
-    console.log("Connecting to Mongo DB");
-  }
-);
+connect(process.env.MONGO_URL, options, (err) => {
+  if (err) return console.log("Fail to connect Mongo DB");
+  console.log("Connecting to Mongo DB");
+});
 
-run(1, list_type[0], 0);
+// run(1, list_type[0], 0);
 
 function run(page, type, index) {
   console.log(`running ${page} - ${type} - ${index} `);

@@ -4,6 +4,7 @@ const { BaseUser } = require("../models/user.model");
 const House = require("../models/house.model");
 const { failureRes, successRes } = require("../config/response");
 const { saveNotification } = require("../config/helper");
+const { clearHash } = require("../utils/redis");
 
 module.exports.signUp = async (req, res) => {
   const { displayName, username, phone, role, password, confirmPassword } =
@@ -114,5 +115,14 @@ module.exports.getNotificationList = async (req, res) => {
   )
     .populate({ path: "notifications", options: { sort: { createAt: -1 } } })
     .then((data) => successRes(req, res)({ user: data }))
+    .catch((error) => failureRes(req, res)([error?.message]));
+};
+
+module.exports.getUserList = async (req, res) => {
+  await BaseUser.find(
+    {},
+    { favorite: 0, notifications: 0, password: 0, myHouse: 0 }
+  )
+    .then((users) => successRes(req, res)({ users }))
     .catch((error) => failureRes(req, res)([error?.message]));
 };

@@ -27,7 +27,7 @@ const HouseSchema = new Schema({
     type: String,
     required: true,
   },
-  location: {
+  position: {
     type: { type: String, default: "Point" },
     coordinates: [Number],
   },
@@ -60,6 +60,6 @@ const HouseSchema = new Schema({
   },
 });
 
-HouseSchema.index({ location: "2dsphere" });
+HouseSchema.index({ position: "2dsphere" });
 
 module.exports = model("House", HouseSchema);

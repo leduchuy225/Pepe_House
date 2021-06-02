@@ -88,7 +88,7 @@ module.exports.createHouse = async (req, res) => {
     phone,
     images: result,
     author: req.user._id,
-    location: { coordinates: [parseFloat(long), parseFloat(lat)] },
+    position: { coordinates: [parseFloat(long), parseFloat(lat)] },
   });
   try {
     await house.save().then((data) => {

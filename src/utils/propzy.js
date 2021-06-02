@@ -25,12 +25,16 @@ const options = {
 };
 
 const list_type = ["mua/nha/hcm"];
-const pageIn = [1];
+const pageIn = [2];
 
-connect("mongo_url", options, (err) => {
-  if (err) return console.log("Fail to connect Mongo DB");
-  console.log("Connecting to Mongo DB");
-});
+connect(
+  "mongodb+srv://admin:admin@cluster0.90ul9.mongodb.net/pepe-house?retryWrites=true&w=majority",
+  options,
+  (err) => {
+    if (err) return console.log("Fail to connect Mongo DB");
+    console.log("Connecting to Mongo DB");
+  }
+);
 
 run(1, list_type[0], 0);
 
@@ -54,19 +58,15 @@ function run(page, type, index) {
             process.exit(1);
           });
       });
-      /* if (index < list_type.length) {
+
       setTimeout(() => {
         if (page < pageIn[index]) {
-          run(db, page + 1, list_type[index], index);
-        } else process.exit(1);
-        else {
-          page = 0;
-          index = index + 1;
-          run(db, page + 1, list_type[index], index);
+          run(page + 1, list_type[index], index);
+        } else {
+          process.exit(1);
         }
         //run(db, page + 1, type)
       }, 5 * 1000);
-    } */
     })
     .catch(console.log);
 }
@@ -153,7 +153,7 @@ function getDetail(link) {
           area: parseFloat(area),
           description: description,
           status: housing_type === "Bán" ? HouseStatus.SELLING : housing_type,
-          location: { coordinates: [parseFloat(lon), parseFloat(lat)] },
+          position: { coordinates: [parseFloat(lon), parseFloat(lat)] },
           images: list_img,
           contact: "Tiep Bip",
           phone: "123456789",

@@ -26,24 +26,23 @@ module.exports.editReview = async (req, res) => {
   const { content, point } = req.body;
   const { errors, valid } = validateReview({ point, content });
   if (!valid) return failureRes(req, res)([errors]);
-  try {
-    const review = await Review.findOneAndUpdate(
-      { _id: req.params.reviewId },
-      { point, content }
-    );
-    return successRes(req, res)({ review });
-  } catch (error) {
-    return failureRes(req, res)([error?.message]);
-  }
+  await Review.findOneAndUpdate(
+    { _id: req.params.reviewId },
+    { point, content },
+    () => {}
+  )
+    .then((data) => {
+      if (!data) throw new Error("Review not found");
+      return successRes(req, res)({ review: data });
+    })
+    .catch((error) => failureRes(req, res)([error?.message]));
 };
 
 module.exports.deleteReview = async (req, res) => {
-  try {
-    const result = await Review.deleteOne({ _id: req.params.reviewId });
-    if (!result.deletedCount) throw new Error("Review not found");
-
-    return successRes(req, res)({ message: "Delete review successfully" });
-  } catch (error) {
-    return failureRes(req, res)([error?.message]);
-  }
+  await Review.deleteOne({ _id: req.params.reviewId })
+    .then((result) => {
+      if (!result.deletedCount) throw new Error("Review not found");
+      return successRes(req, res)({ message: "Delete review successfully" });
+    })
+    .catch((error) => failureRes(req, res)([error?.message]));
 };

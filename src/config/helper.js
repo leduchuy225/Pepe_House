@@ -1,4 +1,5 @@
 const House = require("../models/house.model");
+const Review = require("../models/review.model");
 const { BaseUser } = require("../models/user.model");
 const Notification = require("../models/notification.model");
 

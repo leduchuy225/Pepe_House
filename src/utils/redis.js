@@ -48,11 +48,8 @@ function saveCache(options) {
 function loadDataFromCache(exec, type) {
   return async function () {
     if (!this.useCache) {
-      console.log("Executing without Redis");
       return await exec.apply(this, arguments);
     }
-
-    console.log("Execute with Redis");
 
     let key;
     switch (type) {

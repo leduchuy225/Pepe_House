@@ -13,3 +13,9 @@ exports.HouseStatus = {
   SELLING: 2,
   SOLD: 3,
 };
+
+exports.HouseStatusText = {
+  1: "PENDING",
+  2: "SELLING",
+  3: "SOLD",
+};

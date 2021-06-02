@@ -7,7 +7,7 @@ require("./src/utils/redis");
 const options = {
   useUnifiedTopology: true,
   useNewUrlParser: true,
-  useFindAndModify: true,
+  useFindAndModify: false,
 };
 
 const app = express();

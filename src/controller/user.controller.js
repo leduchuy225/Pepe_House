@@ -3,6 +3,7 @@ const { generateToken } = require("../utils/jwt");
 const { BaseUser } = require("../models/user.model");
 const House = require("../models/house.model");
 const { failureRes, successRes } = require("../config/response");
+const { saveNotification } = require("../config/helper");
 
 module.exports.signUp = async (req, res) => {
   const { displayName, username, phone, role, password, confirmPassword } =
@@ -63,15 +64,16 @@ module.exports.myHouse = async (req, res) => {
 };
 
 module.exports.changeUserRole = async (req, res) => {
-  try {
-    await BaseUser.updateOne(
-      { _id: req.params.userId },
-      { role: req.body.role }
-    );
-  } catch (error) {
-    return failureRes(req, res)([err?.message]);
-  }
-  return successRes(req, res)({ message: "Change user role successfully" });
+  await BaseUser.updateOne({ _id: req.params.userId }, { role: req.body.role })
+    .then(async (result) => {
+      if (!result.nModified) throw new Error("Your role hasn't changed");
+      await saveNotification({
+        userId: req.params.userId,
+        content: `Your role has been changed to ${req.body.role}`,
+      });
+      return successRes(req, res)({ message: "Change user role successfully" });
+    })
+    .catch((error) => failureRes(req, res)([error?.message]));
 };
 
 module.exports.addToFavorite = async (req, res) => {
@@ -110,7 +112,7 @@ module.exports.getNotificationList = async (req, res) => {
     { _id: req.user._id },
     { displayName: 1, notifications: 1 }
   )
-    .populate("notifications")
+    .populate({ path: "notifications", options: { sort: { createAt: -1 } } })
     .then((data) => successRes(req, res)({ user: data }))
     .catch((error) => failureRes(req, res)([error?.message]));
 };

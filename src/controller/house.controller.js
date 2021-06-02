@@ -2,7 +2,13 @@ const House = require("../models/house.model");
 const { validateHouse } = require("../config/validator");
 const { failureRes, successRes } = require("../config/response");
 const { uploadFile } = require("../utils/cloudinary");
-const { Role, HouseStatus, PAGE, PER_PAGE } = require("../config/const");
+const {
+  Role,
+  HouseStatus,
+  PAGE,
+  PER_PAGE,
+  HouseStatusText,
+} = require("../config/const");
 const { saveNotification } = require("../config/helper");
 const { BaseUser } = require("../models/user.model");
 const { clearHash } = require("../utils/redis");
@@ -145,35 +151,37 @@ module.exports.editHouse = async (req, res) => {
 };
 
 module.exports.deleteHouse = async (req, res) => {
-  try {
-    await House.findOneAndDelete({ _id: req.params.houseId }, (err, data) => {
-      saveNotification({
+  await House.findOneAndDelete({ _id: req.params.houseId })
+    .then(async (data) => {
+      await saveNotification({
         userId: data.author,
         content: `House ${data.name} with id ${data._id} was deleted`,
       });
-    });
-    return successRes(req, res)({ message: "Delete house successfully" });
-  } catch (error) {
-    return failureRes(req, res)([error?.message]);
-  }
+      return successRes(req, res)({ message: "Delete house successfully" });
+    })
+    .catch((error) => failureRes(req, res)([error?.message]));
 };
 
 module.exports.changeHouseStatus = async (req, res) => {
-  try {
-    await House.findOneAndUpdate(
-      { _id: req.params.houseId },
-      { status: req.body.status },
-      (err, data) => {
-        saveNotification({
-          userId: data.author,
-          content: `House ${data.name} with id ${data._id} was changed status`,
-        });
-      }
-    );
-  } catch (error) {
-    return failureRes(req, res)([err?.message]);
-  }
-  return successRes(req, res)({ message: "Change house status successfully" });
+  await House.findOneAndUpdate(
+    { _id: req.params.houseId },
+    { status: req.body.status }
+  )
+    .then(async (data) => {
+      await saveNotification({
+        userId: data.author,
+        content: `House ${data.name} with id ${
+          data._id
+        } was changed status to ${
+          HouseStatusText[HouseStatus[req.body.status]]
+        }`,
+      });
+      return successRes(
+        req,
+        res
+      )({ message: "Change house status successfully" });
+    })
+    .catch((error) => failureRes(req, res)([error?.message]));
 };
 
 module.exports.searchHouse = async (req, res) => {

@@ -38,6 +38,7 @@ module.exports.signUp = async (req, res) => {
 };
 
 module.exports.signIn = async (req, res) => {
+  console.log("Sign in:", req.body);
   const { username, password } = req.body;
   const { errors, valid } = validateSignIn({ username, password });
   const err = [];

@@ -61,6 +61,7 @@ module.exports.getHouseById = async (req, res) => {
 };
 
 module.exports.createHouse = async (req, res) => {
+  console.log("Create house: ", req.body);
   const { name, address, description, price, area, contact, phone, long, lat } =
     req.body;
   const { errors, valid } = validateHouse({
@@ -190,12 +191,12 @@ module.exports.searchHouse = async (req, res) => {
   const sortBy = req.query?.sortBy || "createAt";
 
   let option = { name: { $regex: regex } };
-  if (req.user?.role !== Role.ADMIN) {
+  /* if (req.user?.role !== Role.ADMIN) {
     option = {
       ...option,
       status: { $in: [HouseStatus.SELLING, HouseStatus.SOLD] },
     };
-  }
+  } */
   const houses = await House.find(option, { reviews: 0 })
     .sort({ [sortBy]: [order] })
     .skip(page * perPage - perPage)
